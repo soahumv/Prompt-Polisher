@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptPerfect | AI Prompt Polisher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-brand { background: linear-gradient(135deg, #4F46E5 0%, #9333EA 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen font-sans">
+
+    <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto">
+        <div class="text-2xl font-black tracking-tighter text-white">PROMPT<span class="text-indigo-500">LAB.</span></div>
+        <div class="hidden md:block text-sm text-slate-400">Turn simple ideas into professional AI results.</div>
+    </nav>
+
+    <header class="text-center py-16 px-4">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">
+            Stop writing <span class="text-transparent bg-clip-text gradient-brand">bad prompts.</span>
+        </h1>
+        <p class="max-w-2xl mx-auto text-slate-400 text-lg">
+            Our specialized algorithm polishes your rough ideas into structured, high-performance instructions for ChatGPT, Claude, and Midjourney.
+        </p>
+    </header>
+
+    <main class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 px-6 pb-20">
+        
+        <div class="glass-card p-8 rounded-3xl">
+            <label class="block text-indigo-400 font-bold mb-3 uppercase text-xs tracking-widest">Your Rough Idea</label>
+            <textarea id="userInput" class="w-full h-64 bg-slate-900/50 border border-slate-700 rounded-2xl p-5 text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder-slate-600" placeholder="e.g., Write a story about a brave robot..."></textarea>
+            <button onclick="polishAction()" class="w-full mt-6 gradient-brand text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 transition-all">
+                Polish My Prompt <i class="fa-solid fa-wand-sparkles ml-2"></i>
+            </button>
+        </div>
+
+        <div class="glass-card p-8 rounded-3xl relative">
+            <label class="block text-purple-400 font-bold mb-3 uppercase text-xs tracking-widest">Enhanced Result</label>
+            <div id="outputDisplay" class="w-full h-64 bg-slate-900/50 border border-slate-700 rounded-2xl p-5 text-slate-400 italic overflow-y-auto whitespace-pre-wrap">
+Your polished prompt will appear here...
+            </div>
+            <button onclick="copyText()" class="w-full mt-6 border border-slate-700 hover:bg-white hover:text-black text-white font-bold py-4 rounded-2xl transition-all">
+                Copy to Clipboard <i class="fa-solid fa-copy ml-2"></i>
+            </button>
+        </div>
+    </main>
+
+    <section class="max-w-4xl mx-auto mb-20 px-6">
+        <div class="bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-indigo-500/30 p-10 rounded-[3rem] text-center">
+            <h2 class="text-2xl font-bold mb-4">Support My Journey</h2>
+            <p class="text-slate-400 mb-8">I'm a developer building free tools to help people work smarter. If this tool saved you time, consider supporting me!</p>
+            
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="https://www.buymeacoffee.com/YOUR_USERNAME" target="_blank" class="bg-[#FFDD00] text-black font-extrabold px-8 py-4 rounded-2xl flex items-center justify-center hover:bg-yellow-400 transition">
+                    <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="BMC" class="w-5 mr-2"> Buy Me a Coffee
+                </a>
+                
+                <a href="mailto:your-email@gmail.com?subject=Custom AI Project" class="bg-white text-black font-extrabold px-8 py-4 rounded-2xl flex items-center justify-center hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-briefcase mr-2"></i> Hire Me for Custom Tools
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center py-10 text-slate-600 text-sm border-t border-slate-900">
+        &copy; 2026 PromptLab AI. All rights reserved.
+    </footer>
+
+    <script>
+        function polishAction() {
+            const input = document.getElementById('userInput').value;
+            const output = document.getElementById('outputDisplay');
+            if(!input) { alert("Please enter a prompt first!"); return; }
+
+            output.innerHTML = "Engineering your prompt...";
+            
+            setTimeout(() => {
+                const result = `[Act as a Professional Expert]\n\nPrompt Goal: ${input}\n\nConstraints:\n- Detailed and technical vocabulary\n- Step-by-step logical structure\n- Avoid fluff and filler words\n\nPlease provide a comprehensive response that prioritizes accuracy and actionable insights.`;
+                output.innerText = result;
+                output.classList.remove('text-slate-400', 'italic');
+                output.classList.add('text-white');
+            }, 800);
+        }
+
+        function copyText() {
+            const text = document.getElementById('outputDisplay').innerText;
+            navigator.clipboard.writeText(text);
+            alert("Copied to clipboard!");
+        }
+    </script>
+</body>
+</html>
