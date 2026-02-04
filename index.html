@@ -3,96 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptLab | AI Prompt Polisher</title>
+    <title>PromptLab | Interactive AI Polisher</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        .gradient-brand { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .glass-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        body { background: radial-gradient(circle at top right, #1e1b4b, #020617); color: #e2e8f0; }
-        .success-btn { background-color: #10b981 !important; color: white !important; }
+        body {
+            background: #020617;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        /* Floating Bubbles Styling */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.15);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            z-index: -1;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-20vh) translateX(50px); opacity: 0; }
+        }
+
+        .gradient-brand {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ai-chip.active {
+            background: #6366f1;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
     </style>
 </head>
-<body class="min-h-screen font-sans">
+<body class="min-h-screen font-sans antialiased relative">
+
+    <div id="bubble-container"></div>
 
     <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto">
         <div class="text-2xl font-black tracking-tighter text-white">PROMPT<span class="text-indigo-500">LAB.</span></div>
     </nav>
 
-    <header class="text-center py-10 px-4">
-        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4">Stop writing <span class="gradient-brand">bad prompts.</span></h1>
-        <p class="text-slate-400">Transform rough ideas into professional AI instructions instantly.</p>
+    <header class="text-center py-12 px-4">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
+            Elevate Your <span class="gradient-brand">AI Logic.</span>
+        </h1>
+        <p class="text-slate-400 text-lg">Select an AI model and transform basic ideas into elite prompts.</p>
     </header>
 
-    <main class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 px-6 pb-12">
-        <div class="glass-card p-6 rounded-3xl">
-            <div class="flex justify-between items-center mb-3">
-                <label class="text-indigo-400 font-bold uppercase text-xs tracking-widest">Your Rough Idea</label>
-                <button onclick="document.getElementById('userInput').value='Write a professional email about a project delay'" class="text-[10px] text-slate-400 hover:text-white underline">Try an Example</button>
-            </div>
-            <textarea id="userInput" class="w-full h-64 bg-slate-900/50 border border-slate-700 rounded-2xl p-5 text-white outline-none focus:border-indigo-500 transition-all" placeholder="Type your idea here..."></textarea>
-            <button onclick="polishAction()" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl transition-all">
-                Polish My Prompt <i class="fa-solid fa-wand-sparkles ml-2"></i>
-            </button>
+    <main class="max-w-6xl mx-auto px-6 pb-20 relative z-10">
+        <div class="flex flex-wrap justify-center gap-3 mb-10">
+            <button onclick="selectAI('ChatGPT', this)" class="ai-chip active px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">ChatGPT</button>
+            <button onclick="selectAI('Claude', this)" class="ai-chip px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">Claude</button>
+            <button onclick="selectAI('Gemini', this)" class="ai-chip px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">Gemini</button>
+            <button onclick="selectAI('Grok', this)" class="ai-chip px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">Grok</button>
+            <button onclick="selectAI('Perplexity', this)" class="ai-chip px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">Perplexity</button>
         </div>
 
-        <div class="glass-card p-6 rounded-3xl">
-            <label class="block text-purple-400 font-bold mb-3 uppercase text-xs tracking-widest">Enhanced Result</label>
-            <div id="outputDisplay" class="w-full h-64 bg-slate-900/50 border border-slate-700 rounded-2xl p-5 text-slate-400 italic overflow-y-auto">Your polished prompt will appear here...</div>
-            <button id="copyBtn" onclick="copyText()" class="w-full mt-4 border border-slate-700 hover:bg-white hover:text-black text-white font-bold py-4 rounded-2xl transition-all">
-                Copy to Clipboard <i class="fa-solid fa-copy ml-2"></i>
-            </button>
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="glass-card p-8 rounded-[2.5rem]">
+                <label class="text-indigo-400 font-bold uppercase text-[10px] tracking-[0.2em] mb-4 block">Input Rough Idea</label>
+                <textarea id="userInput" class="w-full h-72 bg-slate-900/50 border border-slate-800 rounded-2xl p-6 text-white outline-none focus:border-indigo-500 transition-all" placeholder=""></textarea>
+                <button onclick="polishAction()" class="w-full mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-2xl hover:scale-[1.02] transition-transform shadow-xl">
+                    Polish for <span id="targetAI">ChatGPT</span>
+                </button>
+            </div>
+
+            <div class="glass-card p-8 rounded-[2.5rem] flex flex-col">
+                <label class="text-purple-400 font-bold uppercase text-[10px] tracking-[0.2em] mb-4 block">Polished Engineering</label>
+                <div id="outputDisplay" class="flex-grow w-full bg-slate-900/50 border border-slate-800 rounded-2xl p-6 text-slate-400 italic overflow-y-auto">Results will appear here...</div>
+                <button id="copyBtn" onclick="copyText()" class="w-full mt-6 border border-slate-700 hover:bg-white hover:text-black text-white font-bold py-4 rounded-2xl transition-all">
+                    Copy Prompt <i class="fa-solid fa-copy ml-2"></i>
+                </button>
+            </div>
         </div>
     </main>
 
-    <section class="max-w-2xl mx-auto mb-20 px-6">
-        <div class="bg-indigo-900/20 border border-indigo-500/30 p-8 rounded-3xl text-center">
-            <h2 class="text-xl font-bold mb-2 text-white">Support My Journey</h2>
-            <p class="text-sm text-slate-400 mb-6">If this tool helps you, consider a small tip or hiring me for projects!</p>
-            <div class="flex flex-wrap gap-4 justify-center">
-                <a href="https://www.paypal.me/sv7958" target="_blank" class="bg-blue-600 px-6 py-3 rounded-xl font-bold text-sm text-white hover:bg-blue-500 transition"><i class="fa-brands fa-paypal mr-2"></i>PayPal</a>
-                <a href="mailto:lucifermorningstar369v@gmail.com" class="bg-white text-black px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 transition"><i class="fa-solid fa-envelope mr-2"></i>Email Me</a>
+    <section class="max-w-2xl mx-auto pb-20 px-6">
+        <div class="glass-card p-8 rounded-3xl text-center border-indigo-500/20">
+            <h3 class="font-bold mb-4">Support Free AI Tools</h3>
+            <div class="flex justify-center gap-4">
+                <a href="https://www.paypal.me/sv7958" target="_blank" class="bg-blue-600 px-6 py-3 rounded-xl text-sm font-bold">PayPal</a>
+                <a href="mailto:lucifermorningstar369v@gmail.com" class="bg-white text-black px-6 py-3 rounded-xl text-sm font-bold">Hire Me</a>
             </div>
         </div>
     </section>
 
-    <footer class="text-center py-6 text-slate-600 text-xs">
-        &copy; 2026 PromptLab AI. Built for the community.
-    </footer>
-
     <script>
+        // 1. Create Floating Bubbles
+        const bubbleContainer = document.getElementById('bubble-container');
+        const aiNames = ['GPT', 'Claude', 'Grok', 'Gemini', 'Perplexity', 'AI'];
+        
+        for (let i = 0; i < 15; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble flex items-center justify-center text-[10px] font-bold text-indigo-300';
+            const size = Math.random() * 60 + 40 + 'px';
+            bubble.style.width = size;
+            bubble.style.height = size;
+            bubble.style.left = Math.random() * 100 + 'vw';
+            bubble.style.animationDelay = Math.random() * 15 + 's';
+            bubble.innerText = aiNames[Math.floor(Math.random() * aiNames.length)];
+            bubbleContainer.appendChild(bubble);
+        }
+
+        // 2. Typing Animation for Placeholder
+        const textarea = document.getElementById('userInput');
+        const textToType = "How it works: We take your rough idea, add professional personas, define specific constraints, and structure it for the best possible AI response...";
+        let index = 0;
+
+        function typePlaceholder() {
+            if (index < textToType.length) {
+                textarea.placeholder += textToType.charAt(index);
+                index++;
+                setTimeout(typePlaceholder, 40);
+            }
+        }
+        window.onload = typePlaceholder;
+
+        // 3. Logic Functions
+        let currentAI = 'ChatGPT';
+
+        function selectAI(name, element) {
+            currentAI = name;
+            document.getElementById('targetAI').innerText = name;
+            document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+        }
+
         function polishAction() {
             const input = document.getElementById('userInput').value;
             const output = document.getElementById('outputDisplay');
-            if(!input) { alert("Please type something first!"); return; }
+            if(!input) return alert("Enter a prompt!");
 
-            output.innerText = "Engineering your prompt...";
+            output.innerHTML = `<span class="animate-pulse">Analyzing logic for ${currentAI}...</span>`;
             
             setTimeout(() => {
-                const result = `[Act as a Professional Expert]\n\nTask: ${input}\n\nRequirements:\n- Use a professional and clear tone\n- Be highly detailed\n- Provide a step-by-step structure\n- Remove all unnecessary words`;
-                output.innerText = result;
-                output.classList.remove('text-slate-400', 'italic');
+                output.innerText = `[System: Act as ${currentAI} Expert]\n\nContext: ${input}\n\nOptimization: Please provide a structured, high-density response focused on accuracy and professional tone. Avoid conversational filler.`;
+                output.classList.remove('italic', 'text-slate-400');
                 output.classList.add('text-white');
-            }, 600);
+            }, 1000);
         }
 
         function copyText() {
-            const outputDiv = document.getElementById('outputDisplay');
-            const text = outputDiv.innerText;
-            if (text.includes("Your polished prompt")) return;
-            
+            const text = document.getElementById('outputDisplay').innerText;
             navigator.clipboard.writeText(text);
-            
             const btn = document.getElementById('copyBtn');
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = "Copied! ✓";
-            btn.classList.add('success-btn');
-            
-            setTimeout(() => {
-                btn.innerHTML = originalHtml;
-                btn.classList.remove('success-btn');
-            }, 2000);
+            btn.innerText = "Copied! ✓";
+            setTimeout(() => btn.innerText = "Copy Prompt", 2000);
         }
     </script>
 </body>
