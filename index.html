@@ -3,168 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptLab | Interactive AI Polisher</title>
+    <title>PromptLab | Universal AI Polisher</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        body {
-            background: #020617;
-            color: #f1f5f9;
-            overflow-x: hidden;
+        :root { --cursor-x: 50%; --cursor-y: 50%; }
+        body { background: #010409; color: #f1f5f9; overflow-x: hidden; margin: 0; }
+
+        /* Dynamic Background */
+        .bg-living {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background: radial-gradient(circle at var(--cursor-x) var(--cursor-y), #1e293b 0%, #010409 60%);
+            transition: background 0.1s ease;
         }
 
-        /* Floating Bubbles Styling */
+        /* Bubble Base Styles */
         .bubble {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(99, 102, 241, 0.15);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
-            z-index: -1;
-            animation: float 20s infinite linear;
+            position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 10px; color: white; pointer-events: none; z-index: -1;
+            backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);
+            animation: floatUp 25s infinite linear, wobble 5s infinite ease-in-out;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.1);
         }
 
-        @keyframes float {
-            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
             10% { opacity: 1; }
             90% { opacity: 1; }
-            100% { transform: translateY(-20vh) translateX(50px); opacity: 0; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
         }
 
-        .gradient-brand {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        @keyframes wobble {
+            0%, 100% { border-radius: 50% 50% 50% 50%; }
+            33% { border-radius: 40% 60% 50% 50%; }
+            66% { border-radius: 55% 45% 60% 40%; }
         }
 
-        .glass-card {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        /* Brand Specifics */
+        .b-grok { background: radial-gradient(circle, #333 0%, #000 100%); border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        .b-deepseek { background: radial-gradient(circle, #00d4ff 0%, #003366 100%); border-color: #00d4ff; }
+        .b-gemini { background: radial-gradient(circle, #4285f4 0%, #9b51e0 100%); }
+        .b-qwen { background: radial-gradient(circle, #722ed1 0%, #fadb14 100%); color: #000; }
+        .b-claude { background: radial-gradient(circle, #d97706 0%, #fef3c7 100%); color: #78350f; }
+        .b-gpt { background: radial-gradient(circle, #10a37f 0%, #054a3a 100%); }
+        .b-mistral { background: radial-gradient(circle, #ff4500 0%, #fbbf24 100%); }
 
-        .ai-chip.active {
-            background: #6366f1;
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
-        }
+        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .ai-chip.active { background: white; color: black; box-shadow: 0 0 20px #fff; }
     </style>
 </head>
-<body class="min-h-screen font-sans antialiased relative">
+<body class="min-h-screen relative antialiased">
 
+    <div class="bg-living"></div>
     <div id="bubble-container"></div>
 
-    <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto">
-        <div class="text-2xl font-black tracking-tighter text-white">PROMPT<span class="text-indigo-500">LAB.</span></div>
+    <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto relative z-10">
+        <div class="text-2xl font-black text-white italic">PROMPT<span class="text-indigo-500">LAB.</span></div>
     </nav>
 
-    <header class="text-center py-12 px-4">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
-            Elevate Your <span class="gradient-brand">AI Logic.</span>
-        </h1>
-        <p class="text-slate-400 text-lg">Select an AI model and transform basic ideas into elite prompts.</p>
+    <header class="text-center py-10 px-4 relative z-10">
+        <h1 class="text-5xl md:text-7xl font-black text-white mb-4">Universal <span class="text-indigo-500">Optimizer.</span></h1>
+        <p class="text-slate-400">One prompt to rule them all. Branded engineering for 2026 models.</p>
     </header>
 
     <main class="max-w-6xl mx-auto px-6 pb-20 relative z-10">
-        <div class="flex flex-wrap justify-center gap-3 mb-10">
-            <button onclick="selectAI('ChatGPT', this)" class="ai-chip active px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">ChatGPT</button>
-            <button onclick="selectAI('Claude', this)" class="ai-chip px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">Claude</button>
-            <button onclick="selectAI('Gemini', this)" class="ai-chip px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">Gemini</button>
-            <button onclick="selectAI('Grok', this)" class="ai-chip px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">Grok</button>
-            <button onclick="selectAI('Perplexity', this)" class="ai-chip px-6 py-2 rounded-full border border-slate-700 text-sm font-bold transition-all">Perplexity</button>
+        <div class="flex flex-wrap justify-center gap-2 mb-10">
+            <button onclick="selectAI('DeepSeek', this)" class="ai-chip px-5 py-2 rounded-full border border-slate-700 text-xs font-bold uppercase">DeepSeek</button>
+            <button onclick="selectAI('Grok', this)" class="ai-chip px-5 py-2 rounded-full border border-slate-700 text-xs font-bold uppercase">Grok</button>
+            <button onclick="selectAI('Qwen', this)" class="ai-chip px-5 py-2 rounded-full border border-slate-700 text-xs font-bold uppercase">Qwen</button>
+            <button onclick="selectAI('Claude', this)" class="ai-chip px-5 py-2 rounded-full border border-slate-700 text-xs font-bold uppercase">Claude</button>
+            <button onclick="selectAI('Gemini', this)" class="ai-chip px-5 py-2 rounded-full border border-slate-700 text-xs font-bold uppercase">Gemini</button>
+            <button onclick="selectAI('Mistral', this)" class="ai-chip px-5 py-2 rounded-full border border-slate-700 text-xs font-bold uppercase text-white">Mistral</button>
         </div>
 
         <div class="grid md:grid-cols-2 gap-8">
-            <div class="glass-card p-8 rounded-[2.5rem]">
-                <label class="text-indigo-400 font-bold uppercase text-[10px] tracking-[0.2em] mb-4 block">Input Rough Idea</label>
-                <textarea id="userInput" class="w-full h-72 bg-slate-900/50 border border-slate-800 rounded-2xl p-6 text-white outline-none focus:border-indigo-500 transition-all" placeholder=""></textarea>
-                <button onclick="polishAction()" class="w-full mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-2xl hover:scale-[1.02] transition-transform shadow-xl">
-                    Polish for <span id="targetAI">ChatGPT</span>
-                </button>
+            <div class="glass-card p-8 rounded-[2rem]">
+                <textarea id="userInput" class="w-full h-72 bg-transparent text-white outline-none text-lg" placeholder=""></textarea>
+                <button onclick="polishAction()" class="w-full mt-6 bg-white text-black font-black py-4 rounded-xl hover:bg-indigo-500 hover:text-white transition-all">POLISH FOR <span id="targetAI">GPT</span></button>
             </div>
 
-            <div class="glass-card p-8 rounded-[2.5rem] flex flex-col">
-                <label class="text-purple-400 font-bold uppercase text-[10px] tracking-[0.2em] mb-4 block">Polished Engineering</label>
-                <div id="outputDisplay" class="flex-grow w-full bg-slate-900/50 border border-slate-800 rounded-2xl p-6 text-slate-400 italic overflow-y-auto">Results will appear here...</div>
-                <button id="copyBtn" onclick="copyText()" class="w-full mt-6 border border-slate-700 hover:bg-white hover:text-black text-white font-bold py-4 rounded-2xl transition-all">
-                    Copy Prompt <i class="fa-solid fa-copy ml-2"></i>
-                </button>
+            <div class="glass-card p-8 rounded-[2rem] flex flex-col">
+                <div id="outputDisplay" class="flex-grow text-slate-400 italic overflow-y-auto min-h-[18rem]">Polished engineering result...</div>
+                <button id="copyBtn" onclick="copyText()" class="w-full mt-6 border border-slate-700 py-4 rounded-xl font-bold hover:border-white transition">COPY PROMPT</button>
             </div>
         </div>
     </main>
 
-    <section class="max-w-2xl mx-auto pb-20 px-6">
-        <div class="glass-card p-8 rounded-3xl text-center border-indigo-500/20">
-            <h3 class="font-bold mb-4">Support Free AI Tools</h3>
-            <div class="flex justify-center gap-4">
-                <a href="https://www.paypal.me/sv7958" target="_blank" class="bg-blue-600 px-6 py-3 rounded-xl text-sm font-bold">PayPal</a>
-                <a href="mailto:lucifermorningstar369v@gmail.com" class="bg-white text-black px-6 py-3 rounded-xl text-sm font-bold">Hire Me</a>
-            </div>
-        </div>
-    </section>
-
     <script>
-        // 1. Create Floating Bubbles
-        const bubbleContainer = document.getElementById('bubble-container');
-        const aiNames = ['GPT', 'Claude', 'Grok', 'Gemini', 'Perplexity', 'AI'];
-        
-        for (let i = 0; i < 15; i++) {
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble flex items-center justify-center text-[10px] font-bold text-indigo-300';
-            const size = Math.random() * 60 + 40 + 'px';
-            bubble.style.width = size;
-            bubble.style.height = size;
-            bubble.style.left = Math.random() * 100 + 'vw';
-            bubble.style.animationDelay = Math.random() * 15 + 's';
-            bubble.innerText = aiNames[Math.floor(Math.random() * aiNames.length)];
-            bubbleContainer.appendChild(bubble);
-        }
+        // 1. Interactive Background Tracking
+        document.addEventListener('mousemove', e => {
+            document.documentElement.style.setProperty('--cursor-x', (e.clientX / window.innerWidth * 100) + '%');
+            document.documentElement.style.setProperty('--cursor-y', (e.clientY / window.innerHeight * 100) + '%');
+        });
 
-        // 2. Typing Animation for Placeholder
+        // 2. Branded Bubble Generator
+        const brands = [
+            { name: 'Grok', class: 'b-grok' }, { name: 'DeepSeek', class: 'b-deepseek' },
+            { name: 'Gemini', class: 'b-gemini' }, { name: 'Qwen', class: 'b-qwen' },
+            { name: 'Claude', class: 'b-claude' }, { name: 'GPT', class: 'b-gpt' },
+            { name: 'Mistral', class: 'b-mistral' }
+        ];
+
+        function createBubble() {
+            const container = document.getElementById('bubble-container');
+            const b = brands[Math.floor(Math.random() * brands.length)];
+            const div = document.createElement('div');
+            const size = Math.random() * 60 + 50 + 'px';
+            div.className = `bubble ${b.class}`;
+            div.style.width = div.style.height = size;
+            div.style.left = Math.random() * 100 + 'vw';
+            div.style.animationDuration = (Math.random() * 10 + 20) + 's';
+            div.innerText = b.name;
+            container.appendChild(div);
+            setTimeout(() => div.remove(), 30000);
+        }
+        setInterval(createBubble, 1500);
+
+        // 3. Logic & Typing
         const textarea = document.getElementById('userInput');
-        const textToType = "How it works: We take your rough idea, add professional personas, define specific constraints, and structure it for the best possible AI response...";
-        let index = 0;
+        const textToType = "How it works: We optimize for DeepSeek's chain-of-thought, Grok's real-time data access, and Qwen's multilingual coding power. Your prompt will be 2026-ready...";
+        let i = 0;
+        function type() { if(i < textToType.length) { textarea.placeholder += textToType[i++]; setTimeout(type, 30); } }
+        window.onload = () => { type(); for(let x=0; x<10; x++) createBubble(); };
 
-        function typePlaceholder() {
-            if (index < textToType.length) {
-                textarea.placeholder += textToType.charAt(index);
-                index++;
-                setTimeout(typePlaceholder, 40);
-            }
-        }
-        window.onload = typePlaceholder;
-
-        // 3. Logic Functions
-        let currentAI = 'ChatGPT';
-
-        function selectAI(name, element) {
+        let currentAI = 'GPT';
+        function selectAI(name, el) {
             currentAI = name;
             document.getElementById('targetAI').innerText = name;
             document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
-            element.classList.add('active');
+            el.classList.add('active');
         }
 
         function polishAction() {
             const input = document.getElementById('userInput').value;
-            const output = document.getElementById('outputDisplay');
-            if(!input) return alert("Enter a prompt!");
-
-            output.innerHTML = `<span class="animate-pulse">Analyzing logic for ${currentAI}...</span>`;
-            
+            if(!input) return;
+            const out = document.getElementById('outputDisplay');
+            out.innerHTML = `<span class="animate-pulse">Reasoning with ${currentAI} DNA...</span>`;
             setTimeout(() => {
-                output.innerText = `[System: Act as ${currentAI} Expert]\n\nContext: ${input}\n\nOptimization: Please provide a structured, high-density response focused on accuracy and professional tone. Avoid conversational filler.`;
-                output.classList.remove('italic', 'text-slate-400');
-                output.classList.add('text-white');
+                out.innerText = `[Expert Mode: ${currentAI}]\n\nTask: ${input}\n\nStrict Requirements:\n- Precision-engineered for ${currentAI} architecture.\n- Detailed logical steps.\n- Professional & Actionable output.`;
+                out.classList.remove('italic', 'text-slate-400');
+                out.classList.add('text-white');
             }, 1000);
         }
 
         function copyText() {
-            const text = document.getElementById('outputDisplay').innerText;
-            navigator.clipboard.writeText(text);
+            navigator.clipboard.writeText(document.getElementById('outputDisplay').innerText);
             const btn = document.getElementById('copyBtn');
-            btn.innerText = "Copied! ✓";
-            setTimeout(() => btn.innerText = "Copy Prompt", 2000);
+            btn.innerText = "COPIED!";
+            setTimeout(() => btn.innerText = "COPY PROMPT", 2000);
         }
     </script>
 </body>
